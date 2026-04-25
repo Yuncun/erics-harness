@@ -1,0 +1,16 @@
+{
+  "name": "erics-review-harness",
+  "description": "Post-edit lint hook for Claude Code: deterministic enforcement of project rules so the LLM can't drift",
+  "version": "0.1.0",
+  "author": {
+    "name": "Eric Shen"
+  },
+  "license": "MIT",
+  "keywords": [
+    "linting",
+    "hooks",
+    "claude-code",
+    "code-quality",
+    "ai-coding"
+  ]
+}

@@ -1,0 +1,31 @@
+# Added: 2026-04-24
+# Catches: Route handlers calling backend methods directly (e.g. `state.backend.generate(...)`)
+#          instead of going through a service layer.
+# Use when: You have a service layer (e.g. PixtermService) wrapping the backend, and
+#           routes should always go through it for orchestration / cross-cutting concerns
+#           (auth, persistence, evals, version bumping).
+# Don't use when: Routes legitimately need backend introspection (e.g. `isinstance` checks,
+#                 reading `backend.client.base_url`). In those cases, refine the rule to
+#                 only ban specific methods (generate, repose, animate) instead of all calls.
+# Adapt: Tune the metavariable-regex to match the backend methods you want to gate.
+#        The example below bans only `generate`, `repose`, `animate` calls.
+# Provenance: Common slip — Claude reaches for `state.backend.generate` instead of
+#             `svc.generate` because the backend object is in scope.
+
+rules:
+  - id: routes-must-use-service
+    message: |
+      Routes must call the service layer, not the backend directly.
+      Use the service method (e.g. `svc.generate()`) instead.
+      Why: the service layer handles orchestration, persistence, evals, and version
+      bumping. Calling backend directly skips all of that.
+    severity: ERROR
+    languages: [python]
+    patterns:
+      - pattern: $STATE.backend.$METHOD(...)
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: "^(generate|repose|animate)$"
+    paths:
+      include:
+        - "**/your_app/routes.py"
