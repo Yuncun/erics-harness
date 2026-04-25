@@ -1,0 +1,17 @@
+{
+  "name": "erics-review-harness",
+  "owner": {
+    "name": "Eric Shen"
+  },
+  "metadata": {
+    "description": "Post-edit lint hook for Claude Code: deterministic enforcement of project rules so the LLM can't drift",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "erics-review-harness",
+      "description": "Post-edit hook that runs your project's linters on every Claude edit, plus a curated Semgrep rule catalog for AI-specific architecture violations.",
+      "source": "./"
+    }
+  ]
+}
