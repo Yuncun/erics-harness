@@ -13,7 +13,13 @@ Key principles imported:
 - Hallucination is real: even Claude invents non-existent syntax sometimes — test interactively before saving
 - Iterate until correct, don't expect first-attempt perfection
 - Don't follow this rigidly if the user's intent can't be expressed structurally — flag and suggest alternatives instead
+
+Note on community sources: ast-grep has an official catalog (https://ast-grep.github.io/catalog/) and
+community packs (e.g. coderabbitai/ast-grep-essentials). They're useful as starting points for common
+patterns but have no per-rule quality signals (no stars, no usage stats, no verification). Treat anything
+copied from them as draft and run the same verification this skill does.
 -->
+
 
 # Writing ast-grep rules for ast-checker
 
