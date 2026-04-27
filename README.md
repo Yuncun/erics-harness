@@ -51,14 +51,10 @@ The hook auto-detects the project root (walks up from the edited file looking fo
 
 Browse [`templates/`](templates/) for the catalog. Each rule is a self-contained YAML file with a metadata header (when to use, when not to, how to adapt).
 
-Easiest path:
-
-```
-/harness add-rule              # lists everything
-/harness add-rule no-direct-field-mutation
-```
-
-Or copy manually: `cp templates/<rule>.yml /your/project/.ast-grep/` then adapt the placeholders.
+Three ways:
+- **From the catalog:** `/harness add-rule <name>` — copies a template and surfaces placeholders
+- **Custom rule:** ask Claude in natural language ("add an ast-grep rule to ban console.log in components") — the bundled `writing-ast-grep-rules` skill walks Claude through pattern, file location, and testing
+- **Manually:** `cp templates/<rule>.yml /your/project/.ast-grep/` and adapt
 
 ## Limitations
 
