@@ -32,10 +32,13 @@ else
   exit 0
 fi
 
-# Run from project root so sgconfig.yml is found
+# Run from project root so sgconfig.yml is found, time the scan
 cd "$PROJECT_ROOT"
+START_NS=$(date +%s%N 2>/dev/null || echo 0)
 OUT=$("$AST_GREP" scan --report-style short "$FILE" 2>&1)
 RC=$?
+END_NS=$(date +%s%N 2>/dev/null || echo 0)
+SCAN_MS=$(( (END_NS - START_NS) / 1000000 ))
 
 if [ $RC -ne 0 ] && [ -n "$OUT" ]; then
   # Extract rule IDs from ast-grep output: lines like "error[<id>]:" or "warning[<id>]:"
@@ -45,6 +48,14 @@ if [ $RC -ne 0 ] && [ -n "$OUT" ]; then
   else
     PREFIX="[ast-checker:$RULE_IDS]"
   fi
+
+  # Append scorecard log entry (per-project, gitignored)
+  mkdir -p "$PROJECT_ROOT/.ast-grep" 2>/dev/null
+  TS=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+  REL_FILE="${FILE#$PROJECT_ROOT/}"
+  RULES_JSON="\"$(echo "$RULE_IDS" | sed 's/,/","/g')\""
+  echo "{\"ts\":\"$TS\",\"rules\":[$RULES_JSON],\"file\":\"$REL_FILE\",\"scan_ms\":$SCAN_MS}" >> "$PROJECT_ROOT/.ast-grep/log.jsonl"
+
   ESCAPED=$(echo "$OUT" | head -20 | sed 's/\\/\\\\/g; s/"/\\"/g' | tr '\n' ' ')
   echo "{\"decision\": \"block\", \"reason\": \"$PREFIX ast-grep findings in $FILE: $ESCAPED\"}"
 fi

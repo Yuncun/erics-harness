@@ -54,3 +54,9 @@ When a Claude shortcut keeps recurring across multiple sessions, it earns a slot
 - Don't edit hooks/`ast-grep-on-edit.sh` without testing — it runs on every Claude edit in every project that has this plugin installed. Silent breakage means Claude is no longer caught for any rule.
 - Don't change the JSON `decision: block` output format without checking the [Claude Code hooks docs](https://code.claude.com/docs/en/hooks) — the format is what makes Claude self-correct.
 - Don't add new linters or dispatchers to the hook. This plugin does ast-grep only by design (single responsibility). Other linters get their own plugins.
+
+## Telemetry (per-project log)
+
+The hook appends one JSONL entry to `<project>/.ast-grep/log.jsonl` per fire. Format: `{"ts": "...", "rules": [...], "file": "...", "scan_ms": N}`. Per-project, gitignored — never travels with the repo. `/harness scorecard` reads it to show fire counts + timing per rule.
+
+If you change the JSONL schema, update the scorecard command in lockstep.
