@@ -1,16 +1,12 @@
 # Added: 2026-04-25
 # Catches: Async handler functions matching a name pattern (e.g. `_run_*`) that call
-#          `save_graph` (or any persistence method) directly, instead of returning
-#          the result for a separate accept/commit step.
-# Use when: You have a defer-to-accept pattern — handlers compute results, the user
-#           reviews them, and a separate accept step persists. Common in pipelines
-#           where users may want to discard a generated result.
-# Don't use when: Your handlers are fire-and-forget (no review step) — persistence in
-#                 the handler is the right call.
+#          `save_graph` (or any persistence method) directly.
+# Why I added this: I kept catching Claude inlining `save_graph()` calls inside `_run_*`
+#                   handlers, which broke the defer-to-accept pattern (user couldn't
+#                   discard generated results before they hit disk). Want this enforced
+#                   at the boundary, not after the fact.
 # Adapt: Change the function-name regex (`^_run_`), the persistence call shape
 #        (`save_graph`), and the file path to match your project.
-# Provenance: Hit this in pixterm — `_run_generate`, `_run_repose`, etc. were saving
-#             results before users had a chance to discard them.
 
 id: handler-defer-persist
 language: python
@@ -25,6 +21,10 @@ rule:
 files:
   - "**/your_app/runner.py"
 message: |
-  Handler functions must NOT call save_graph directly.
+  Handler functions named `_run_*` must NOT call `save_graph` directly.
   Defer persistence to the accept handler (defer-to-accept pattern).
+
+  Why this rule exists: handlers compute results, the user reviews them, and
+  a separate accept step persists. Inline persistence breaks that — users
+  can't discard generated results before they hit disk.
 severity: error

@@ -1,0 +1,4 @@
+ruleDirs:
+  - templates
+testConfigs:
+  - testDir: __tests__

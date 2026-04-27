@@ -38,8 +38,15 @@ OUT=$("$AST_GREP" scan --report-style short "$FILE" 2>&1)
 RC=$?
 
 if [ $RC -ne 0 ] && [ -n "$OUT" ]; then
+  # Extract rule IDs from ast-grep output: lines like "error[<id>]:" or "warning[<id>]:"
+  RULE_IDS=$(echo "$OUT" | grep -oE '\[(error|warning|info)\]?\[[^]]+\]|\b(error|warning|info)\[[^]]+\]' | grep -oE '\[[^]]+\]$' | tr -d '[]' | sort -u | paste -sd, -)
+  if [ -z "$RULE_IDS" ]; then
+    PREFIX="[ast-checker]"
+  else
+    PREFIX="[ast-checker:$RULE_IDS]"
+  fi
   ESCAPED=$(echo "$OUT" | head -20 | sed 's/\\/\\\\/g; s/"/\\"/g' | tr '\n' ' ')
-  echo "{\"decision\": \"block\", \"reason\": \"ast-grep findings in $FILE: $ESCAPED\"}"
+  echo "{\"decision\": \"block\", \"reason\": \"$PREFIX ast-grep findings in $FILE: $ESCAPED\"}"
 fi
 
 exit 0

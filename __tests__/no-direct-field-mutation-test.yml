@@ -1,0 +1,14 @@
+id: no-direct-field-mutation
+valid:
+  # Other fields are fine
+  - "x.other_field = 'value'"
+  - "edge.target_id = node.id"
+  # Variable named prompt is fine (not attribute access)
+  - "prompt = 'hello'"
+  # Reading prompt is fine
+  - "result = node.prompt"
+invalid:
+  # Direct mutation of prompt attribute on any object
+  - "edge.prompt = 'new value'"
+  - "node.prompt = compute_prompt()"
+  - "self.prompt = arg"

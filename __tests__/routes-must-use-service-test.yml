@@ -1,0 +1,17 @@
+id: routes-must-use-service
+valid:
+  # Service-layer calls — fine
+  - "svc.generate(prompt)"
+  - "service.repose(image, prompt)"
+  # Backend introspection (not generate/repose/animate) — fine
+  - "url = state.backend.client.base_url"
+  - "wf = state.backend.workflows.get_by_name(name)"
+  - "isinstance(state.backend, HybridBackend)"
+  # Different method names — fine
+  - "state.backend.list_models()"
+  - "state.backend.cancel(job_id)"
+invalid:
+  # Direct backend calls to gated methods — should fire
+  - "result = state.backend.generate(prompt)"
+  - "await state.backend.repose(img, prompt)"
+  - "state.backend.animate(start, end, prompt)"

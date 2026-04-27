@@ -1,0 +1,23 @@
+id: handler-defer-persist
+valid:
+  # save_graph in non-handler function — fine
+  - |
+    def helper(state):
+        state.store.save_graph("k", {})
+  # save_graph in async function NOT matching _run_* — fine
+  - |
+    async def background_task(state):
+        state.store.save_graph("k", {})
+  # _run_* function without save_graph — fine
+  - |
+    async def _run_compute(j, state):
+        return state.backend.compute()
+invalid:
+  # save_graph inside async _run_* handler — should fire
+  - |
+    async def _run_generate(j, k, state):
+        state.store.save_graph("x", {})
+  - |
+    async def _run_repose(j, k, state):
+        result = compute()
+        state.store.save_graph("x", result)

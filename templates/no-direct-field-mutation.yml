@@ -1,11 +1,9 @@
 # Added: 2026-04-25
 # Catches: LLM mutating an entity field (e.g. `node.prompt = X`) directly outside the service layer.
-# Use when: You have a service layer that owns persistence, version-bumping, or invariants
-#           around a particular field, and bypassing it leaves the system inconsistent.
-# Don't use when: Your project has no service-layer pattern, or the field is freely mutable.
+# Why I added this: I kept seeing Claude assign `edge.prompt = X` directly when there's
+#                   a service method (`update_prompt()`) that handles persistence + version-bumping.
+#                   Catching this at edit time, not in code review.
 # Adapt: Change the field name (`prompt`) and the file globs to match your project.
-# Provenance: Hit this in pixterm — runner.py was assigning `edge.prompt = X` directly,
-#             bypassing PixtermService's update_edge_prompt() which handles persistence.
 
 id: no-direct-field-mutation
 language: python
@@ -15,6 +13,9 @@ files:
   - "**/your_app/routes.py"
   - "**/your_app/handlers.py"
 message: |
-  Direct mutation of `.prompt` is forbidden outside the service layer.
-  Use the service method (e.g. `update_prompt()`) instead.
+  Direct mutation of `.prompt` outside the service layer is forbidden.
+  Use the service method (e.g. `svc.update_prompt()`) instead.
+
+  Why this rule exists: persistence and version-bumping live in the service layer.
+  Bypassing it leaves the system in an inconsistent state.
 severity: error

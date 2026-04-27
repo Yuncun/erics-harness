@@ -1,16 +1,14 @@
 # Added: 2026-04-25
 # Catches: Route handlers calling backend methods directly (e.g. `state.backend.generate(...)`)
-#          instead of going through a service layer.
-# Use when: You have a service layer (e.g. PixtermService) wrapping the backend, and
-#           routes should always go through it for orchestration / cross-cutting concerns
-#           (auth, persistence, evals, version bumping).
-# Don't use when: Routes legitimately need backend introspection (e.g. `isinstance` checks,
-#                 reading `backend.client.base_url`). In those cases, refine the rule to
-#                 only ban specific methods instead of all calls.
+#          instead of going through the service layer.
+# Why I added this: When `state.backend` is in scope, Claude reaches for
+#                   `state.backend.generate()` instead of `svc.generate()`. The service
+#                   layer handles orchestration / persistence / evals — bypassing it
+#                   skips all of that silently.
 # Adapt: Tune the constraints regex to match the backend methods you want to gate.
-#        The example below bans only `generate`, `repose`, `animate` calls.
-# Provenance: Common slip — Claude reaches for `state.backend.generate` instead of
-#             `svc.generate` because the backend object is in scope.
+#        The example below bans only `generate`, `repose`, `animate` calls (which
+#        are the orchestration entry points; introspection like `backend.client.base_url`
+#        legitimately stays).
 
 id: routes-must-use-service
 language: python
@@ -22,6 +20,8 @@ constraints:
 files:
   - "**/your_app/routes.py"
 message: |
-  Routes must call the service layer, not the backend directly.
-  Use the service method (e.g. `svc.generate()`) instead.
+  Routes must call the service layer (e.g. `svc.generate()`), not the backend directly.
+
+  Why this rule exists: the service layer handles orchestration, persistence, evals,
+  and version-bumping. Calling backend methods directly skips all of that.
 severity: error
